@@ -14,9 +14,16 @@ def load_settings():
     return {}
 
 def save_settings(ticker_dict):
-    with open(SETTINGS_FILE, "w") as f:
-        json.dump(ticker_dict, f)
-
+    try:
+        with open(SETTINGS_FILE, "w") as f:
+            json.dump(ticker_dict, f)
+    except PermissionError:
+        # In der Cloud darf man oft nicht schreiben - wir ignorieren das einfach
+        pass
+    except Exception as e:
+        # Falls ein anderer Fehler auftritt, zeigen wir ihn nur kurz an
+        st.toast(f"Speichern lokal nicht möglich: {e}")
+        
 def calculate_rsi(data, window=14):
     delta = data.diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
