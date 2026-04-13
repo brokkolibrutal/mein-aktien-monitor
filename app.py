@@ -32,7 +32,7 @@ def calculate_rsi(data, window=14):
     return 100 - (100 / (1 + rs))
 
 # Konfiguration für 2026er Version
-st.set_page_config(page_title="Aktien-Monitor Pro v26", layout="wide")
+st.set_page_config(page_title="Brokkoli-Aktien-Monitor Pro v26", layout="wide")
 
 saved_tickers = load_settings()
 
