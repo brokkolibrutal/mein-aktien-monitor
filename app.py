@@ -36,7 +36,7 @@ st.set_page_config(page_title="Brokkoli-Aktien-Monitor Pro v26", layout="wide")
 
 saved_tickers = load_settings()
 
-st.title("📊 Aktien-Monitor Pro (v26.0.1)")
+st.title("📊 Brokkoli-Aktien-Monitor Pro (v26.0.1)")
 
 with st.sidebar:
     st.header("Watchlist")
