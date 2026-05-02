@@ -9,21 +9,19 @@ SETTINGS_FILE = "settings.json"
 
 def load_settings():
     if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(SETTINGS_FILE, "r") as f:
+                return json.load(f)
+        except: return {}
     return {}
 
 def save_settings(ticker_dict):
     try:
         with open(SETTINGS_FILE, "w") as f:
             json.dump(ticker_dict, f)
-    except PermissionError:
-        # In der Cloud darf man oft nicht schreiben - wir ignorieren das einfach
-        pass
-    except Exception as e:
-        # Falls ein anderer Fehler auftritt, zeigen wir ihn nur kurz an
-        st.toast(f"Speichern lokal nicht möglich: {e}")
-        
+    except:
+        pass # Verhindert Fehler in der Cloud
+
 def calculate_rsi(data, window=14):
     delta = data.diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
@@ -31,16 +29,18 @@ def calculate_rsi(data, window=14):
     rs = gain / loss
     return 100 - (100 / (1 + rs))
 
-# Konfiguration für 2026er Version
-st.set_page_config(page_title="Brokkoli-Aktien-Monitor Pro v26", layout="wide")
+st.set_page_config(page_title="Brokkoli Aktien-Monitor", layout="wide")
 
 saved_tickers = load_settings()
 
-st.title("📊 Brokkoli-Aktien-Monitor Pro (v26.0.1)")
+st.title("📊 Brokkoli Aktien-Monitor Pro")
 
 with st.sidebar:
-    st.header("Watchlist")
-    period = st.selectbox("Zeitraum", options=["1mo", "1y"], format_func=lambda x: "1 Monat" if x=="1mo" else "1 Jahr")
+    st.header("Konfiguration")
+    # Erweiterte Zeitspanne
+    period = st.selectbox("Zeitraum", options=["1mo", "1y", "3y"], 
+                         format_func=lambda x: "1 Monat" if x=="1mo" else "1 Jahr" if x=="1y" else "3 Jahre")
+    
     st.divider()
     tickers_input = []
     current_input_values = {}
@@ -49,23 +49,22 @@ with st.sidebar:
         val = st.text_input(f"Stock {i+1}", value=saved_tickers.get(key, ""), key=key)
         current_input_values[key] = val.strip()
         if val.strip():
-            tickers_input.append(val.strip())
+            tickers_input.append(val.strip().upper())
 
 if tickers_input:
     save_settings(current_input_values)
-    
-    # Grid-Layout für maximale Übersicht
     cols = st.columns(2, gap="small")
     
     for idx, ticker in enumerate(tickers_input):
         with cols[idx % 2]:
             try:
                 t_obj = yf.Ticker(ticker)
-                data = t_obj.history(period="2y")
+                # Lade genug Daten für den SMA200 und den gewählten Zeitraum
+                data = t_obj.history(period="4y") 
                 if data.empty: continue
 
                 info = t_obj.info
-                name = (info.get('shortName') or "Unbekannt")[:22]
+                name = (info.get('shortName') or ticker)[:25]
                 
                 # Berechnungen
                 data['SMA200'] = data['Close'].rolling(window=200).mean()
@@ -76,37 +75,39 @@ if tickers_input:
                 curr_rsi = data['RSI'].iloc[-1]
                 dist_sma = ((curr_price - curr_sma) / curr_sma) * 100
                 
-                # Signale
                 rsi_signal = "🟢" if curr_rsi < 35 else "🔴" if curr_rsi > 65 else "⚪"
                 trend_signal = "✅" if curr_price > curr_sma else "❌"
                 
-                # Header & Metriken kompakt in einer Zeile
                 st.markdown(f"#### {ticker} | {name}")
                 
-                # Plotly Chart
+                # Zeitraum-Filter für den Plot
+                if period == "1mo": plot_data = data.tail(30)
+                elif period == "1y": plot_data = data.tail(252)
+                else: plot_data = data.tail(252 * 3) # 3 Jahre
+
                 fig = go.Figure()
-                plot_data = data.tail(30) if period == "1mo" else data.tail(252)
                 fig.add_trace(go.Scatter(x=plot_data.index, y=plot_data['Close'], name='Kurs', line=dict(color='#00d1ff', width=2)))
                 fig.add_trace(go.Scatter(x=plot_data.index, y=plot_data['SMA200'], name='200d', line=dict(color='red', dash='dot', width=1.5)))
                 
-                fig.update_layout(
-                    height=260, 
-                    template="plotly_dark", 
-                    showlegend=False, 
-                    xaxis_rangeslider_visible=False,
-                    margin=dict(l=0, r=0, t=10, b=0),
-                    xaxis=dict(showgrid=False),
-                    yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)')
-                )
+                fig.update_layout(height=260, template="plotly_dark", showlegend=False, 
+                                  margin=dict(l=0, r=0, t=10, b=0), xaxis=dict(showgrid=False))
                 
-                # Das neue width="stretch" aus v26
-                st.plotly_chart(fig, width="stretch")
-
-                # Info-Leiste
+                st.plotly_chart(fig, use_container_width=True)
                 st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal}")
+                
+                # --- NEU: NEWS TICKER ---
+                with st.expander(f"📰 News zu {ticker}"):
+                    news = t_obj.news[:3] # Die letzten 3 Schlagzeilen
+                    if news:
+                        for item in news:
+                            st.markdown(f"**[{item['title']}]({item['link']})**")
+                            st.caption(f"Quelle: {item.get('publisher', 'Unbekannt')}")
+                    else:
+                        st.write("Keine aktuellen News gefunden.")
+                
                 st.divider()
 
-            except Exception:
-                st.error(f"Fehler: {ticker}")
+            except Exception as e:
+                st.error(f"Fehler bei {ticker}")
 else:
-    st.info("👈 Bitte gib links in der Sidebar deine Aktien-Ticker ein.")
+    st.info("👈 Bitte gib Ticker in der Sidebar ein.")
