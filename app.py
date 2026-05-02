@@ -20,7 +20,7 @@ def save_settings(ticker_dict):
         with open(SETTINGS_FILE, "w") as f:
             json.dump(ticker_dict, f)
     except:
-        pass # Verhindert Fehler in der Cloud
+        pass 
 
 def calculate_rsi(data, window=14):
     delta = data.diff()
@@ -37,7 +37,6 @@ st.title("📊 Brokkoli Aktien-Monitor Pro")
 
 with st.sidebar:
     st.header("Konfiguration")
-    # Erweiterte Zeitspanne
     period = st.selectbox("Zeitraum", options=["1mo", "1y", "3y"], 
                          format_func=lambda x: "1 Monat" if x=="1mo" else "1 Jahr" if x=="1y" else "3 Jahre")
     
@@ -59,14 +58,15 @@ if tickers_input:
         with cols[idx % 2]:
             try:
                 t_obj = yf.Ticker(ticker)
-                # Lade genug Daten für den SMA200 und den gewählten Zeitraum
+                # Genug Daten laden (4 Jahre für 3 Jahre Plot + SMA200 Vorlauf)
                 data = t_obj.history(period="4y") 
-                if data.empty: continue
+                if data.empty: 
+                    st.error(f"Keine Daten für {ticker}")
+                    continue
 
                 info = t_obj.info
                 name = (info.get('shortName') or ticker)[:25]
                 
-                # Berechnungen
                 data['SMA200'] = data['Close'].rolling(window=200).mean()
                 data['RSI'] = calculate_rsi(data['Close'])
                 
@@ -80,10 +80,9 @@ if tickers_input:
                 
                 st.markdown(f"#### {ticker} | {name}")
                 
-                # Zeitraum-Filter für den Plot
                 if period == "1mo": plot_data = data.tail(30)
                 elif period == "1y": plot_data = data.tail(252)
-                else: plot_data = data.tail(252 * 3) # 3 Jahre
+                else: plot_data = data.tail(252 * 3)
 
                 fig = go.Figure()
                 fig.add_trace(go.Scatter(x=plot_data.index, y=plot_data['Close'], name='Kurs', line=dict(color='#00d1ff', width=2)))
@@ -92,22 +91,28 @@ if tickers_input:
                 fig.update_layout(height=260, template="plotly_dark", showlegend=False, 
                                   margin=dict(l=0, r=0, t=10, b=0), xaxis=dict(showgrid=False))
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key=f"chart_{ticker}")
                 st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal}")
                 
-                # --- NEU: NEWS TICKER ---
-                with st.expander(f"📰 News zu {ticker}"):
-                    news = t_obj.news[:3] # Die letzten 3 Schlagzeilen
-                    if news:
-                        for item in news:
-                            st.markdown(f"**[{item['title']}]({item['link']})**")
-                            st.caption(f"Quelle: {item.get('publisher', 'Unbekannt')}")
-                    else:
-                        st.write("Keine aktuellen News gefunden.")
+                # News Sektion mit Fehlerschutz
+                try:
+                    with st.expander(f"📰 News zu {ticker}"):
+                        stock_news = t_obj.news
+                        if stock_news:
+                            for item in stock_news[:3]:
+                                n_title = item.get('title', 'Kein Titel')
+                                n_link = item.get('link', '#')
+                                n_pub = item.get('publisher', 'Unbekannt')
+                                st.markdown(f"**[{n_title}]({n_link})**")
+                                st.caption(f"Quelle: {n_pub}")
+                        else:
+                            st.write("Keine News verfügbar.")
+                except:
+                    st.write("News-Schnittstelle antwortet nicht.")
                 
                 st.divider()
 
             except Exception as e:
-                st.error(f"Fehler bei {ticker}")
+                st.error(f"Fehler bei {ticker}: {e}")
 else:
     st.info("👈 Bitte gib Ticker in der Sidebar ein.")
