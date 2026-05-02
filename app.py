@@ -91,25 +91,10 @@ if tickers_input:
                                   margin=dict(l=0, r=0, t=10, b=0), xaxis=dict(showgrid=False))
                 
                 st.plotly_chart(fig, use_container_width=True, key=f"chart_{ticker}")
-                st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal}")
                 
-                # --- NEWS MIT VERBESSERTER STRUKTUR-ANALYSE ---
-                try:
-                    with st.expander(f"📰 News zu {ticker}"):
-                        raw_news = t_obj.news
-                        if raw_news and len(raw_news) > 0:
-                            for item in raw_news[:3]:
-                                # Wir suchen dynamisch nach Inhalt
-                                title = item.get('title') or "Keine Schlagzeile gefunden"
-                                link = item.get('link') or "https://finance.yahoo.com"
-                                pub = item.get('publisher') or item.get('source') or "Finanzquelle"
-                                
-                                st.markdown(f"**[{title}]({link})**")
-                                st.caption(f"Quelle: {pub}")
-                        else:
-                            st.write("Keine aktuellen News bei Yahoo verfügbar.")
-                except:
-                    st.write("News-Abruf fehlgeschlagen.")
+                # Info-Zeile und direkter News-Link
+                news_url = f"https://finance.yahoo.com/quote/{ticker}/news"
+                st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal} | [📰 News]({news_url})")
                 
                 st.divider()
 
