@@ -58,7 +58,6 @@ if tickers_input:
         with cols[idx % 2]:
             try:
                 t_obj = yf.Ticker(ticker)
-                # Daten laden (4 Jahre, um 3 Jahre + SMA200 abzudecken)
                 data = t_obj.history(period="4y") 
                 if data.empty: 
                     st.error(f"Keine Daten für {ticker}")
@@ -80,7 +79,6 @@ if tickers_input:
                 
                 st.markdown(f"#### {ticker} | {name}")
                 
-                # Plot-Zeitraum filtern
                 if period == "1mo": plot_data = data.tail(30)
                 elif period == "1y": plot_data = data.tail(252)
                 else: plot_data = data.tail(252 * 3)
@@ -95,21 +93,23 @@ if tickers_input:
                 st.plotly_chart(fig, use_container_width=True, key=f"chart_{ticker}")
                 st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal}")
                 
-                # News Sektion mit verbesserter Titelsuche
+                # --- NEWS MIT VERBESSERTER STRUKTUR-ANALYSE ---
                 try:
                     with st.expander(f"📰 News zu {ticker}"):
-                        stock_news = t_obj.news
-                        if stock_news:
-                            for item in stock_news[:3]:
-                                n_title = item.get('title') or item.get('headline') or item.get('text') or "Schlagzeile verfügbar"
-                                n_link = item.get('link') or item.get('url') or "#"
-                                n_pub = item.get('publisher') or item.get('source') or "Quelle"
-                                st.markdown(f"**[{n_title}]({n_link})**")
-                                st.caption(f"Quelle: {n_pub}")
+                        raw_news = t_obj.news
+                        if raw_news and len(raw_news) > 0:
+                            for item in raw_news[:3]:
+                                # Wir suchen dynamisch nach Inhalt
+                                title = item.get('title') or "Keine Schlagzeile gefunden"
+                                link = item.get('link') or "https://finance.yahoo.com"
+                                pub = item.get('publisher') or item.get('source') or "Finanzquelle"
+                                
+                                st.markdown(f"**[{title}]({link})**")
+                                st.caption(f"Quelle: {pub}")
                         else:
-                            st.write("Keine aktuellen News gefunden.")
+                            st.write("Keine aktuellen News bei Yahoo verfügbar.")
                 except:
-                    st.write("News-Schnittstelle momentan blockiert.")
+                    st.write("News-Abruf fehlgeschlagen.")
                 
                 st.divider()
 
