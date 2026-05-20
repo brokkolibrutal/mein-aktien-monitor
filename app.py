@@ -77,6 +77,21 @@ if tickers_input:
                 rsi_signal = "🟢" if curr_rsi < 35 else "🔴" if curr_rsi > 65 else "⚪"
                 trend_signal = "✅" if curr_price > curr_sma else "❌"
                 
+                # --- NEU: RULE OF 40 BERECHNUNG ---
+                rule_of_40_str = ""
+                try:
+                    # Yahoo liefert die Werte als Dezimalzahlen (z.B. 0.15 für 15%)
+                    rev_growth = info.get('revenueGrowth')
+                    ebitda_margin = info.get('ebitdaMargins')
+                    
+                    if rev_growth is not None and ebitda_margin is not None:
+                        # Berechnung in Prozent
+                        r40_score = (rev_growth + ebitda_margin) * 100
+                        r40_signal = "🚀" if r40_score >= 40 else "⚪"
+                        rule_of_40_str = f" | **R40:** {r40_score:.1f}% {r40_signal}"
+                except:
+                    pass # Falls Daten fehlen, bleibt der String leer
+                
                 st.markdown(f"#### {ticker} | {name}")
                 
                 if period == "1mo": plot_data = data.tail(30)
@@ -92,9 +107,9 @@ if tickers_input:
                 
                 st.plotly_chart(fig, use_container_width=True, key=f"chart_{ticker}")
                 
-                # Info-Zeile und direkter News-Link
+                # Info-Zeile inklusive dem neuen Rule-of-40 Wert (falls vorhanden)
                 news_url = f"https://finance.yahoo.com/quote/{ticker}/news"
-                st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal} | [📰 News]({news_url})")
+                st.markdown(f"**P:** {curr_price:.2f} | **RSI:** {curr_rsi:.1f} {rsi_signal} | **200d:** {dist_sma:+.1f}% {trend_signal}{rule_of_40_str} | [📰 News]({news_url})")
                 
                 st.divider()
 
