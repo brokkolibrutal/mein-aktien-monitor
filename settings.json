@@ -2,7 +2,7 @@
   "ticker_0": "US4943681035", 
   "ticker_1": "US7427181091", 
   "ticker_2": "US8807701029", 
-  "ticker_3": "US64110L1061", 
+  "ticker_3": "US0517741072", 
   "ticker_4": "US81762P1021", 
   "ticker_5": "US3131483063", 
   "ticker_6": "US8326964058", 
@@ -11,12 +11,12 @@
   "ticker_9": "US5738741041", 
   "ticker_10": "US1101221083", 
   "ticker_11": "US9113121068", 
-  "ticker_12": "US0517741072", 
+  "ticker_12": "US98422D1054", 
   "ticker_13": "US9043111072", 
-  "ticker_14": "US02079K1079", 
-  "ticker_15": "US98422D1054", 
+  "ticker_14": "US02079K1079", //Alphabet
+  "ticker_15": "US6153691059", 
   "ticker_16": "US6974351057", 
-  "ticker_17": "US6153691059", 
+  "ticker_17": "", 
   "ticker_18": "", 
   "ticker_19": ""
 }
