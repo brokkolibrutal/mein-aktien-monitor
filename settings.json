@@ -16,7 +16,7 @@
   "ticker_14": "US02079K1079",
   "ticker_15": "US6153691059", 
   "ticker_16": "NL0000395903", 
-  "ticker_17": "DE0007164600", //Kommentar test
+  "ticker_17": "DE0007164600", /*Kommentar test*/
   "ticker_18": "", 
   "ticker_19": "US8807701029"
 }
