@@ -3,7 +3,7 @@
   "ticker_1": "US7427181091", 
   "ticker_2": "US86800U3023", 
   "ticker_3": "US0517741072", 
-  "ticker_4": "US81762P1021", 
+  "ticker_4": "US81762P1021", "_comment": "ServiceNow",
   "ticker_5": "US79466L3024", 
   "ticker_6": "US8326964058", 
   "ticker_7": "US6974351057", 
@@ -16,7 +16,7 @@
   "ticker_14": "US02079K1079",
   "ticker_15": "US6153691059", 
   "ticker_16": "NL0000395903", 
-  "ticker_17": "DE0007164600", "_comment": "Das ist ein Kommentar, der den nachfolgenden Wert erklärt",
+  "ticker_17": "DE0007164600", "_comment": "SAP SE",
   "ticker_18": "", 
   "ticker_19": "US8807701029"
 }
