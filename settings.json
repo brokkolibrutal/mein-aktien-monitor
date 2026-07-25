@@ -1,7 +1,7 @@
 {
   "ticker_0": "US4943681035", "_comment": "Kimberly-Clark",
   "ticker_1": "US7427181091", "_comment": "Procter & Gamble",
-  "ticker_2": "US86800U3023", "_comment": "Super Micro Computer",
+  "ticker_2": "US68389X1054", "_comment": "Oracle",
   "ticker_3": "US0517741072", "_comment": "Aurora Innovation",
   "ticker_4": "US81762P1021", "_comment": "ServiceNow",
   "ticker_5": "US79466L3024", "_comment": "Salesforce",
@@ -17,6 +17,6 @@
   "ticker_15": "US6153691059", "_comment": " ",
   "ticker_16": "NL0000395903", "_comment": " ",
   "ticker_17": "US8326964058", "_comment": "The J.M. Smucker Company",
-  "ticker_18": "", 
+  "ticker_18": "US86800U3023", "_comment": "Super Micro Computer", 
   "ticker_19": "US8807701029"
 }
