@@ -37,7 +37,6 @@ st.title("📊 Brokkoli Aktien-Monitor Pro")
 
 with st.sidebar:
     st.header("Konfiguration")
-    # index=1 setzt "1y" als voreingestellten Standard beim Laden der Seite
     period = st.selectbox("Zeitraum", options=["1mo", "1y", "3y"], index=1, 
                          format_func=lambda x: "1 Monat" if x=="1mo" else "1 Jahr" if x=="1y" else "3 Jahre")
     
@@ -65,7 +64,7 @@ if tickers_input:
                     continue
 
                 info = t_obj.info
-                name = (info.get('shortName') or ticker)[:25]
+                name = info.get('shortName') or info.get('longName')
                 
                 data['SMA200'] = data['Close'].rolling(window=200).mean()
                 data['RSI'] = calculate_rsi(data['Close'])
@@ -78,7 +77,6 @@ if tickers_input:
                 rsi_signal = "🟢" if curr_rsi < 35 else "🔴" if curr_rsi > 65 else "⚪"
                 trend_signal = "✅" if curr_price > curr_sma else "❌"
                 
-                # Rule of 40 Berechnung (falls Daten verfügbar)
                 rule_of_40_str = ""
                 try:
                     rev_growth = info.get('revenueGrowth')
@@ -91,7 +89,11 @@ if tickers_input:
                 except:
                     pass
                 
-                st.markdown(f"#### {ticker} | {name}")
+                # Zeige den Namen nur, wenn er gefunden wurde und nicht identisch zur ISIN/dem Ticker ist
+                if name and name.upper() != ticker.upper():
+                    st.markdown(f"#### {ticker} | {name[:25]}")
+                else:
+                    st.markdown(f"#### {ticker}")
                 
                 if period == "1mo": plot_data = data.tail(30)
                 elif period == "1y": plot_data = data.tail(252)
