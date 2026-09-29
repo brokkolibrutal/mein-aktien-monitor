@@ -64,7 +64,8 @@ if tickers_input:
                     continue
 
                 info = t_obj.info
-                name = info.get('shortName') or info.get('longName')
+                # Holt den Firmennamen zuverlässig über das Ticker-Symbol
+                company_name = info.get('shortName') or info.get('longName') or ticker
                 
                 data['SMA200'] = data['Close'].rolling(window=200).mean()
                 data['RSI'] = calculate_rsi(data['Close'])
@@ -89,9 +90,9 @@ if tickers_input:
                 except:
                     pass
                 
-                # Zeige den Namen nur, wenn er gefunden wurde und nicht identisch zur ISIN/dem Ticker ist
-                if name and name.upper() != ticker.upper():
-                    st.markdown(f"#### {ticker} | {name[:25]}")
+                # Format: Firmenname | Ticker (z.B. Marvell Technology | MRVL)
+                if company_name.upper() != ticker.upper():
+                    st.markdown(f"#### {company_name[:25]} | {ticker}")
                 else:
                     st.markdown(f"#### {ticker}")
                 
