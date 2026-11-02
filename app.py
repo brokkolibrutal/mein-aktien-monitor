@@ -44,7 +44,8 @@ with st.sidebar:
     st.divider()
     tickers_input = []
     current_input_values = {}
-    for i in range(20):
+    # Erweitert auf 30 Eingabefelder
+    for i in range(30):
         key = f"ticker_{i}"
         val = st.text_input(f"Stock {i+1}", value=saved_tickers.get(key, ""), key=key)
         current_input_values[key] = val.strip()
